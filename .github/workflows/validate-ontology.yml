@@ -1,0 +1,68 @@
+name: Validate grounded ontology
+
+# This is the actual mechanism behind the tutorial's "sustainable over
+# time" claim: re-derive structural facts from the dbt project fresh on
+# every push, and check every ontology/metric claim against them. A stale
+# claim fails the build here instead of surfacing as "this dashboard
+# number looks wrong" weeks later.
+#
+# CHANGED 2026-08-25: CI used to fail on ANY pending review-signoff item,
+# identically to a real mechanically-disproven failure -- which meant it
+# had never once been green since this workflow was created (2026-08-18),
+# through 9+ pushes, unnoticed. A chronically-red CI trains everyone,
+# agent included, to stop looking at it. Now: real FAILURES still block
+# (exit 1, unchanged); pending signoffs surface as a loud GitHub Actions
+# warning annotation but don't fail the job -- see
+# scripts/validate_grounding.py's compute_exit_code(). Note to evaluate: this is
+# a first pass at the split; revisit if it ever turns out to hide
+# something that should have blocked.
+#
+# CHANGED 2026-08-26: CI only ever ran scripts/test_grounding.py and scripts/test_owl.py
+# as two separate steps -- scripts/test_authorized_signers.py and
+# scripts/test_ci_exit_severity.py were never collected here at all, even though
+# hooks/pre-push already runs the whole suite locally (`uv run pytest -q`).
+# CI was strictly weaker than the local gate: a break in either untested
+# file, or any new test added to them, could pass CI while failing
+# pre-push, or worse, pass both because nothing here ran it. Collapsed
+# into one `uv run pytest -v` step that collects and runs all 39 tests.
+
+on:
+  push:
+    branches: [main, "spike/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Build the dbt project (produces target/manifest.json)
+        run: uv run dbt build
+
+      - name: Extract structural facts (zero LLM cost, pure Python)
+        run: uv run python3 scripts/extract_structural_facts.py
+
+      - name: Run the whole test suite
+        run: uv run pytest -v
+
+      - name: Validate the ontology (citations + human signoffs)
+        run: uv run python3 scripts/validate_grounding.py
+
+      - name: Validate derived metrics against the ontology
+        run: uv run python3 scripts/validate_metrics.py
+
+      - name: Export the ontology to OWL (Turtle)
+        run: uv run python3 scripts/generate_owl.py
+
+      - name: Validate the OWL export against the SHACL shapes
+        run: uv run python3 scripts/validate_shacl.py

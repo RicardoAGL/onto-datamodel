@@ -1,0 +1,17 @@
+name: jaffle_shop
+version: "1.0.0"
+
+profile: jaffle_shop
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["data-tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+seeds:
+  jaffle_shop:
+    +schema: raw

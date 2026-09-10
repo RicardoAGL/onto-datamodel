@@ -1,0 +1,16 @@
+{
+  "stg_orders:relationship:stg_stores": {
+    "owner_role": "Store Operations Lead",
+    "question": "Is every order always tied to exactly one store record -- including orders placed through a non-standard channel like a kiosk -- or could one order legitimately need to be split across more than one store?",
+    "routed_at": "",
+    "routed_by": "Ricardo Granados, Analytics Engineer",
+    "text_hash": "3a560cf7cca4efa1"
+  },
+  "stg_stores:grain": {
+    "owner_role": "Store Operations Lead",
+    "question": "Does each row in our store list stand for exactly one physical store location, or could a single site (for example, a kiosk counter inside a bigger store) show up as its own separate row?",
+    "routed_at": "",
+    "routed_by": "Ricardo Granados, Analytics Engineer",
+    "text_hash": "938ae3764c70236a"
+  }
+}

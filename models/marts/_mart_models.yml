@@ -1,0 +1,153 @@
+version: 2
+
+models:
+  - name: customers
+    description: >
+      Customer dimension table with aggregated order metrics.
+      Each row represents a unique customer with their lifetime spend,
+      order count, and customer segment classification.
+    columns:
+      - name: customer_id
+        description: Unique identifier for a customer
+        tests:
+          - unique
+          - not_null
+      - name: first_name
+        description: Customer's first name
+      - name: last_name
+        description: Customer's last name
+      - name: email
+        description: Customer's email address
+      - name: order_count
+        description: Total number of orders placed by this customer
+      - name: first_order_at
+        description: Date of the customer's first order
+      - name: most_recent_order_at
+        description: Date of the customer's most recent order
+      - name: lifetime_spend
+        description: Total amount spent across all orders in USD
+      - name: lifetime_items_purchased
+        description: Total number of individual items purchased
+      - name: lifetime_supply_cost
+        description: Total supply cost across all items purchased
+      - name: customer_segment
+        description: >
+          Customer segment based on order count:
+          champion (5+), regular (3-4), new (1-2), inactive (0)
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["champion", "regular", "new", "inactive"]
+
+  - name: orders
+    description: >
+      Order fact table enriched with store information, tax calculations,
+      item summaries, and gross profit.
+    columns:
+      - name: order_id
+        description: Unique identifier for an order
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to the customer who placed the order
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('customers')
+                field: customer_id
+      - name: ordered_at
+        description: Date when the order was placed
+      - name: order_total
+        description: Order total before tax in USD
+      - name: store_name
+        description: Name of the store where the order was placed
+      - name: tax_rate
+        description: Tax rate applied to this order
+      - name: tax_amount
+        description: Calculated tax amount
+      - name: order_total_with_tax
+        description: Order total including tax
+      - name: item_count
+        description: Number of distinct line items in the order
+      - name: total_quantity
+        description: Total units across all items in the order
+      - name: total_supply_cost
+        description: Total cost of supplies for all items in the order
+      - name: gross_profit
+        description: Order total minus supply costs
+
+  - name: order_items
+    description: >
+      Order line item fact table enriched with product details,
+      revenue calculations, and per-item profit.
+    columns:
+      - name: order_item_id
+        description: Unique identifier for an order line item
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to the parent order
+      - name: customer_id
+        description: Foreign key to the customer who placed the order
+      - name: ordered_at
+        description: Date when the order was placed
+      - name: product_id
+        description: Foreign key to the product
+      - name: product_name
+        description: Name of the product
+      - name: product_category
+        description: Product category (beverage or food)
+      - name: product_price
+        description: Unit retail price of the product
+      - name: quantity
+        description: Number of units purchased
+      - name: item_revenue
+        description: Revenue from this line item (price x quantity)
+      - name: supply_cost
+        description: Unit supply cost
+      - name: item_supply_cost
+        description: Total supply cost for this line item
+      - name: item_profit
+        description: Profit from this line item (revenue - supply cost)
+
+  - name: products
+    description: >
+      Product dimension table enriched with supply chain metrics
+      and sales performance aggregations.
+    columns:
+      - name: product_id
+        description: Unique identifier for a product
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: Display name of the product
+      - name: product_description
+        description: Product description text
+      - name: product_price
+        description: Retail price in USD
+      - name: product_category
+        description: Product category (beverage or food)
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["beverage", "food"]
+      - name: supply_count
+        description: Number of distinct supplies used for this product
+      - name: total_supply_cost
+        description: Total cost of all supplies for this product
+      - name: perishable_supply_count
+        description: Number of perishable supplies used
+      - name: times_ordered
+        description: Number of order line items containing this product
+      - name: total_units_sold
+        description: Total units sold across all orders
+      - name: total_cost_of_goods
+        description: Total cost of goods sold
+      - name: total_revenue
+        description: Total revenue generated by this product
+      - name: total_profit
+        description: Total profit (revenue - cost of goods)

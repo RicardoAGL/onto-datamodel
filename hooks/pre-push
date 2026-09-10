@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Pre-push gate: reject the push outright if the local test suite or the
+# real-failure check (not pending signoffs -- those are expected mid-
+# development, see scripts/validate_grounding.py's compute_exit_code()) is
+# broken. Mechanical, not a promise -- this is exactly what should have
+# stopped 9 consecutive red-CI pushes before they ever left the laptop.
+# Setup: `git config core.hooksPath hooks`. Doesn't replace GitHub branch
+# protection, just runs before it (or before the repo even has it).
+set -euo pipefail
+
+echo "pre-push: running test suite..."
+if ! uv run pytest -q; then
+  echo "pre-push: REJECTED -- test suite is red. Fix it, don't push around it."
+  exit 1
+fi
+
+if [ -f structural_facts.json ]; then
+  echo "pre-push: checking for real (mechanically-disproven) failures..."
+  if ! uv run python3 scripts/validate_grounding.py > /tmp/pre-push-validate.log 2>&1; then
+    if grep -q "^BLOCKED:.*mechanically-disproven" /tmp/pre-push-validate.log; then
+      echo "pre-push: REJECTED -- real mechanically-disproven failure(s) found."
+      tail -20 /tmp/pre-push-validate.log
+      exit 1
+    fi
+    # Non-zero exit for another reason (e.g. structural_facts.json stale) --
+    # don't silently pass, but don't false-block on pending signoffs either
+    # (compute_exit_code already returns 0 for those; a non-zero here means
+    # something else is actually wrong).
+    echo "pre-push: REJECTED -- scripts/validate_grounding.py exited non-zero for a reason other than pending signoffs."
+    tail -20 /tmp/pre-push-validate.log
+    exit 1
+  fi
+else
+  echo "pre-push: structural_facts.json not present (gitignored, regenerate with scripts/extract_structural_facts.py) -- skipping the failure check, tests already ran above."
+fi
+
+echo "pre-push: clean, pushing."

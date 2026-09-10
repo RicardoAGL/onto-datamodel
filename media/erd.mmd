@@ -1,0 +1,104 @@
+erDiagram
+    ORDERS }o--|| CUSTOMERS : "Each order belongs to exactly one custom…"
+    STG_ORDERS }o--|| STG_CUSTOMERS : "Each order belongs to exactly one custom…"
+    STG_ORDERS }o--|| STG_STORES : "Each order was placed at exactly one sto…"
+    STG_ORDER_ITEMS }o--|| STG_ORDERS : "Each order line item belongs to exactly …"
+    STG_ORDER_ITEMS }o--|| STG_PRODUCTS : "Each order line item is for exactly one …"
+    STG_SUPPLIES }o--|| STG_PRODUCTS : "Each supply item is used for exactly one…"
+    CUSTOMERS {
+        string customer_id PK
+        string order_count
+        string customer_segment
+        string lifetime_spend
+        string first_name
+        string last_name
+        string email
+        string first_order_at
+        string most_recent_order_at
+        string lifetime_items_purchased
+        string lifetime_supply_cost
+    }
+    ORDERS {
+        string order_id PK
+        string customer_id FK
+        string order_total
+        string tax_amount
+        string gross_profit
+        string ordered_at
+        string store_name
+        string tax_rate
+        string order_total_with_tax
+        string item_count
+        string total_quantity
+        string total_supply_cost
+    }
+    STG_CUSTOMERS {
+        string customer_id PK
+        string first_name
+        string last_name
+        string email
+    }
+    STG_ORDERS {
+        string order_id PK
+        string customer_id FK
+        string ordered_at
+        string store_id FK
+        string order_total
+    }
+    STG_ORDER_ITEMS {
+        string order_item_id PK
+        string order_id FK
+        string product_id FK
+        string quantity
+        string supply_cost
+    }
+    STG_PRODUCTS {
+        string product_id PK
+        string product_name
+        string product_description
+        string product_price
+        string product_category
+    }
+    STG_STORES {
+        string store_id PK
+        string store_name
+        string opened_at
+        string tax_rate
+    }
+    STG_SUPPLIES {
+        string supply_id PK
+        string supply_name
+        string supply_cost
+        string product_id FK
+        string is_perishable
+    }
+    ORDER_ITEMS {
+        string order_item_id PK
+        string order_id FK
+        string customer_id FK
+        string ordered_at
+        string product_id FK
+        string product_name
+        string product_category
+        string product_price
+        string quantity
+        string item_revenue
+        string supply_cost
+        string item_supply_cost
+        string item_profit
+    }
+    PRODUCTS {
+        string product_id PK
+        string product_name
+        string product_description
+        string product_price
+        string product_category
+        string supply_count
+        string total_supply_cost
+        string perishable_supply_count
+        string times_ordered
+        string total_units_sold
+        string total_cost_of_goods
+        string total_revenue
+        string total_profit
+    }

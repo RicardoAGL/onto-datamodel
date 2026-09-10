@@ -1,0 +1,11 @@
+id,name,description,price,category
+1,Coffee,Freshly brewed drip coffee,3.50,beverage
+2,Tea,Assorted herbal and black teas,2.50,beverage
+3,Latte,Espresso with steamed milk,5.50,beverage
+4,Cappuccino,Espresso with foamed milk,5.50,beverage
+5,Muffin,Blueberry muffin,4.00,food
+6,Croissant,Butter croissant,4.50,food
+7,Bagel,Plain bagel with cream cheese,5.00,food
+8,Sandwich,Turkey and cheese sandwich,8.50,food
+9,Smoothie,Mixed berry smoothie,7.00,beverage
+10,Cookie,Chocolate chip cookie,3.00,food

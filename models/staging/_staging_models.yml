@@ -1,0 +1,261 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw seed data loaded into the warehouse
+    schema: main_raw
+    tables:
+      - name: raw_customers
+        description: Raw customer data from the CRM system
+        columns:
+          - name: id
+            description: Primary key for customers
+            tests:
+              - unique
+              - not_null
+          - name: first_name
+            description: Customer's first name
+          - name: last_name
+            description: Customer's last name
+          - name: email
+            description: Customer's email address
+
+      - name: raw_orders
+        description: Raw order transactions
+        columns:
+          - name: id
+            description: Primary key for orders
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: Foreign key to the customer who placed the order
+          - name: ordered_at
+            description: Timestamp when the order was placed
+          - name: store_id
+            description: Foreign key to the store where the order was placed
+          - name: order_total
+            description: Total amount of the order in USD
+
+      - name: raw_items
+        description: Raw order line items
+        columns:
+          - name: id
+            description: Primary key for order items
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: Foreign key to the parent order
+          - name: product_id
+            description: Foreign key to the product purchased
+          - name: quantity
+            description: Number of units purchased
+          - name: supply_cost
+            description: Cost of supplies per unit
+
+      - name: raw_products
+        description: Raw product catalog
+        columns:
+          - name: id
+            description: Primary key for products
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: Product display name
+          - name: description
+            description: Product description text
+          - name: price
+            description: Retail price in USD
+          - name: category
+            description: Product category (beverage or food)
+
+      - name: raw_supplies
+        description: Raw supply chain data for products
+        columns:
+          - name: id
+            description: Primary key for supplies
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: Supply item name
+          - name: cost
+            description: Cost per unit of the supply
+          - name: product_id
+            description: Foreign key to the product this supply is used for
+          - name: is_perishable
+            description: Whether the supply item is perishable
+
+      - name: raw_stores
+        description: Raw store location data
+        columns:
+          - name: id
+            description: Primary key for stores
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: Store name
+          - name: opened_at
+            description: Date the store opened
+          - name: tax_rate
+            description: Local tax rate applied at this store
+
+      - name: raw_kiosk_sales
+        description: Daily kiosk sales export
+        columns:
+          - name: kiosk_id
+            description: Kiosk identifier
+          - name: store_id
+            description: Store location
+          - name: sale_date
+            description: Date of sale
+          - name: order_total
+            description: The order total
+          - name: items_sold
+            description: Number of items sold
+
+models:
+  - name: stg_customers
+    description: Staged customer data with renamed columns
+    columns:
+      - name: customer_id
+        description: Unique identifier for a customer
+        tests:
+          - unique
+          - not_null
+      - name: first_name
+        description: Customer's first name
+      - name: last_name
+        description: Customer's last name
+      - name: email
+        description: Customer's email address
+
+  - name: stg_orders
+    description: Staged order data with renamed columns and type casting
+    columns:
+      - name: order_id
+        description: Unique identifier for an order
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to stg_customers
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: ordered_at
+        description: Date when the order was placed
+        tests:
+          - not_null
+      - name: store_id
+        description: Foreign key to stg_stores
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_stores')
+                field: store_id
+      - name: order_total
+        description: Total order amount in USD
+
+  - name: stg_order_items
+    description: Staged order line items with renamed columns
+    columns:
+      - name: order_item_id
+        description: Unique identifier for an order line item
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to stg_orders
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        description: Foreign key to stg_products
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: quantity
+        description: Number of units purchased
+      - name: supply_cost
+        description: Cost of supplies per unit
+
+  - name: stg_products
+    description: Staged product catalog with renamed columns
+    columns:
+      - name: product_id
+        description: Unique identifier for a product
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: Display name of the product
+      - name: product_description
+        description: Longer product description text
+      - name: product_price
+        description: Retail price in USD
+      - name: product_category
+        description: Product category (beverage or food)
+
+  - name: stg_supplies
+    description: Staged supply chain data with renamed columns
+    columns:
+      - name: supply_id
+        description: The ID of this table
+        tests:
+          - unique
+          - not_null
+      - name: supply_cost
+        description: Cost per unit of the supply
+      - name: product_id
+        description: Foreign key to stg_products
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: is_perishable
+        description: Whether the supply item is perishable
+
+  - name: stg_stores
+    description: Staged store location data with renamed columns
+    columns:
+      - name: store_id
+        description: Unique identifier for a store
+        tests:
+          - unique
+          - not_null
+      - name: store_name
+        description: Name of the store location
+      - name: opened_at
+        description: Date the store first opened
+      - name: tax_rate
+        description: Local tax rate at this store location
+
+  - name: stg_kiosk_sales
+    description: Staged kiosk pilot sales data
+    columns:
+      - name: kiosk_id
+        description: Kiosk identifier
+      - name: store_id
+        description: Store location
+      - name: sale_date
+        description: Date of sale
+        tests:
+          - not_null
+      - name: order_total
+        description: The order total
+      - name: items_sold
+        description: Number of items sold

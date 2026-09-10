@@ -1,0 +1,21 @@
+id,name,cost,product_id,is_perishable
+1,Coffee Beans,1.50,1,true
+2,Tea Leaves,0.80,2,true
+3,Milk,1.20,3,true
+4,Espresso Beans,2.00,4,true
+5,Blueberries,1.50,5,true
+6,Flour,0.60,5,false
+7,Butter,1.80,6,true
+8,Pastry Dough,1.00,6,false
+9,Cream Cheese,1.40,7,true
+10,Bagel Dough,0.90,7,false
+11,Turkey,2.50,8,true
+12,Cheese,1.60,8,true
+13,Bread,0.80,8,false
+14,Mixed Berries,2.00,9,true
+15,Yogurt,1.20,9,true
+16,Chocolate Chips,1.00,10,false
+17,Cookie Dough,0.70,10,false
+18,Sugar,0.40,1,false
+19,Paper Cups,0.15,1,false
+20,Napkins,0.05,1,false

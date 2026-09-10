@@ -1,0 +1,18 @@
+# Code owners for ontology-affecting files.
+#
+# INERT ON THIS REPO right now, deliberately -- this is a solo-maintainer
+# demo repo, and GitHub does not let a PR author's own approval satisfy
+# "require review from code owners" (nor should it: self-approval proves
+# nothing about independent authorization). This file documents the
+# INTENDED shape for a real multi-person project, not a working gate here.
+#
+# To activate for real: add a second, genuinely independent GitHub
+# username below, then enable "Require review from Code Owners" in this
+# repo's branch protection settings. See AUTHORIZED_SIGNERS.md's
+# "In a real setting" section for the full picture (this file is half of
+# that story -- the enforcement half; AUTHORIZED_SIGNERS.md is the
+# acknowledgment half).
+
+review_signoffs.json  @RicardoAGL
+ontology.ttl           @RicardoAGL
+shapes.ttl              @RicardoAGL

@@ -1,0 +1,69 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <https://github.com/RicardoAGL/onto-datamodel/ontology#> .
+
+# Mirrors the "no claim without a citation" discipline validate_grounding.py
+# already enforces on the Pydantic ontology, applied here as a standards-
+# based structural check on the exported RDF graph. This matters once the
+# ontology leaves Python -- e.g. hand-edited in Protege -- where Pydantic's
+# own validation no longer applies. Same complement as SHACL vs. citation-
+# grounding generally: SHACL proves the graph is well-formed, it can't
+# prove a claim's text actually matches the dbt manifest (see
+# validate_shacl.py's docstring).
+
+ex:EntityClassShape
+    a sh:NodeShape ;
+    sh:targetClass owl:Class ;
+    sh:property [
+        sh:path ex:grain ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Every entity class needs a grain statement -- no entity is complete without one (dbt-wow grain gate)." ;
+    ] ;
+    sh:property [
+        sh:path ex:grainSource ;
+        sh:minCount 1 ;
+        sh:message "Every grain claim needs a citation -- an unsourced grain statement is exactly the failure mode this pipeline exists to prevent." ;
+    ] ;
+    sh:property [
+        sh:path rdfs:comment ;
+        sh:minCount 1 ;
+        sh:message "Every entity class needs a summary (rdfs:comment)." ;
+    ] .
+
+ex:DatatypePropertyShape
+    a sh:NodeShape ;
+    sh:targetClass owl:DatatypeProperty ;
+    sh:property [
+        sh:path ex:source ;
+        sh:minCount 1 ;
+        sh:message "Every column property needs a citation -- an unsourced column claim is exactly the failure mode this pipeline exists to prevent." ;
+    ] ;
+    sh:property [
+        sh:path ex:role ;
+        sh:minCount 1 ;
+        sh:in ( "primary_key" "foreign_key" "attribute" ) ;
+        sh:message "Column role must be one of primary_key, foreign_key, attribute." ;
+    ] ;
+    sh:property [
+        sh:path rdfs:comment ;
+        sh:minCount 1 ;
+        sh:message "Every column property needs a description (rdfs:comment)." ;
+    ] .
+
+ex:ObjectPropertyShape
+    a sh:NodeShape ;
+    sh:targetClass owl:ObjectProperty ;
+    sh:property [
+        sh:path ex:source ;
+        sh:minCount 1 ;
+        sh:message "Every relationship property needs a citation." ;
+    ] ;
+    sh:property [
+        sh:path ex:cardinality ;
+        sh:minCount 1 ;
+        sh:in ( "many-to-one" "one-to-many" "one-to-one" ) ;
+        sh:message "Relationship cardinality must be one of many-to-one, one-to-many, one-to-one." ;
+    ] .

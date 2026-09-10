@@ -1,0 +1,41 @@
+# dbt
+target/
+dbt_packages/
+logs/
+*.duckdb
+*.duckdb.wal
+.user.yml
+
+# Derived pipeline artifacts -- regeneratable from target/manifest.json
+structural_facts.json
+ontology_report.html
+ontology.ttl
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.python-version
+
+# macOS
+.DS_Store
+
+# Claude Code / tool state
+.claude/
+.coderlm/
+
+# Local working docs
+scratchpad.md
+
+# Filled questionnaires (generate_questionnaire.py render) -- a rendered
+# file in this directory carries a real business answer once an expert
+# fills it in, however it ends up named (renamed, exported to .docx,
+# nested under --out-dir). Ignore the whole directory, not a filename
+# glob -- a glob only catches files that keep the exact prefix+extension
+# the generator itself writes, and a filled/renamed artifact routinely
+# won't.
+# questionnaire_routing.json stays tracked -- it's an input, not output.
+questionnaires/
+
+# Local publishing checklist, not part of the tutorial.
+PUBLISH_CHECKLIST.md

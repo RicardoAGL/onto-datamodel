@@ -4,6 +4,9 @@ A companion repo for a conference talk on grounding AI agents in your
 data model: why an agent that can draft a data-model description isn't
 the same as one you can trust, and what closes that gap.
 
+This pipeline also generalizes into a broader internal Xebia toolkit,
+not yet public.
+
 ## What this actually is
 
 AI can clearly read SQL and draft what a data model means. The real
